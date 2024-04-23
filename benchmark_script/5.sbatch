@@ -11,7 +11,7 @@
 
 
 eval "$(conda shell.bash hook)"
-conda activate py39
+conda activate py312
 
 
 cd /scratch/wzhang/projects/ggWGBS/perf_bench/data/5.mcall/
@@ -20,7 +20,7 @@ cd /scratch/wzhang/projects/ggWGBS/perf_bench/data/5.mcall/
 echo "start"
 date +%s
 
-python3 /scratch/wzhang/bin/MethylGrapher/src/main.py MethylCall -work_dir ./ -index_prefix /scratch/wzhang/projects/ggWGBS/perf_bench/data/wgbs_graph2/pan.v1.hg38 -t 16
+methylGrapher MethylCall -work_dir ./ -index_prefix /scratch/wzhang/projects/ggWGBS/perf_bench/data/wgbs_graph2/pan.v1.hg38 -t 16
 
 
 echo "end"

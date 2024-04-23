@@ -11,7 +11,7 @@
 
 
 eval "$(conda shell.bash hook)"
-conda activate py39
+conda activate py312
 
 
 cd /scratch/wzhang/projects/ggWGBS/perf_bench/data/4.alignment/
@@ -20,7 +20,7 @@ cd /scratch/wzhang/projects/ggWGBS/perf_bench/data/4.alignment/
 echo "start"
 date +%s
 
-python3 /scratch/wzhang/bin/MethylGrapher/src/main.py Align -t 20 -work_dir ./ -index_prefix /scratch/wzhang/projects/ggWGBS/perf_bench/data/wgbs_graph2/pan.v1.hg38
+methylGrapher Align -t 20 -work_dir ./ -index_prefix /scratch/wzhang/projects/ggWGBS/perf_bench/data/wgbs_graph2/pan.v1.hg38
 
 echo "end"
 date +%s

@@ -1,0 +1,17 @@
+Metadata-Version: 2.1
+Name: methylGrapher
+Version: 0.1.1
+Summary: WGBS data analysis for genome graph
+Home-page: https://github.com/twlab/methylGrapher
+Download-URL: https://github.com/twlab/methylGrapher/releases/download/V0.1.1/methylGrapher-0.1.1.tar.gz
+Author: Wenjin Zhang
+Author-email: wenjin@wustl.edu
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Build Tools
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Requires-Python: >=3.7
+License-File: LICENSE.txt

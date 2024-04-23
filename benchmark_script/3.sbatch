@@ -11,7 +11,7 @@
 
 
 eval "$(conda shell.bash hook)"
-conda activate py39
+conda activate py312
 
 
 cd /scratch/wzhang/projects/ggWGBS/perf_bench/data/3.conversion/
@@ -19,7 +19,7 @@ cd /scratch/wzhang/projects/ggWGBS/perf_bench/data/3.conversion/
 echo "start"
 date +%s
 
-python3 /scratch/wzhang/bin/MethylGrapher/src/main.py PrepareLibrary -fq1 ./R1.dedup.fq.gz -fq2 ./R2.dedup.fq.gz -work_dir ./out -compress N
+methylGrapher PrepareLibrary -fq1 ./R1.dedup.fq.gz -fq2 ./R2.dedup.fq.gz -work_dir ./out -compress N
 
 
 echo "end"
