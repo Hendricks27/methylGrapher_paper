@@ -1,0 +1,11 @@
+Barcode,Name,Dataset,File1,File2
+HG00621_1,HG00621_1,HG00621_1,/scratch/wzhang/projects/ggWGBS/data/2.dedup/HG00621.1.R1.fq.gz,/scratch/wzhang/projects/ggWGBS/data/2.dedup/HG00621.1.R2.fq.gz
+HG00621_2,HG00621_2,HG00621_2,/scratch/wzhang/projects/ggWGBS/data/2.dedup/HG00621.2.R1.fq.gz,/scratch/wzhang/projects/ggWGBS/data/2.dedup/HG00621.2.R2.fq.gz
+HG00741_1,HG00741_1,HG00741_1,/scratch/wzhang/projects/ggWGBS/data/2.dedup/HG00741.1.R1.fq.gz,/scratch/wzhang/projects/ggWGBS/data/2.dedup/HG00741.1.R2.fq.gz
+HG00741_2,HG00741_2,HG00741_2,/scratch/wzhang/projects/ggWGBS/data/2.dedup/HG00741.2.R1.fq.gz,/scratch/wzhang/projects/ggWGBS/data/2.dedup/HG00741.2.R2.fq.gz
+HG01952_1,HG01952_1,HG01952_1,/scratch/wzhang/projects/ggWGBS/data/2.dedup/HG01952.1.R1.fq.gz,/scratch/wzhang/projects/ggWGBS/data/2.dedup/HG01952.1.R2.fq.gz
+HG01952_2,HG01952_2,HG01952_2,/scratch/wzhang/projects/ggWGBS/data/2.dedup/HG01952.2.R1.fq.gz,/scratch/wzhang/projects/ggWGBS/data/2.dedup/HG01952.2.R2.fq.gz
+HG01978_1,HG01978_1,HG01978_1,/scratch/wzhang/projects/ggWGBS/data/2.dedup/HG01978.1.R1.fq.gz,/scratch/wzhang/projects/ggWGBS/data/2.dedup/HG01978.1.R2.fq.gz
+HG01978_2,HG01978_2,HG01978_2,/scratch/wzhang/projects/ggWGBS/data/2.dedup/HG01978.2.R1.fq.gz,/scratch/wzhang/projects/ggWGBS/data/2.dedup/HG01978.2.R2.fq.gz
+HG03516_1,HG03516_1,HG03516_1,/scratch/wzhang/projects/ggWGBS/data/2.dedup/HG03516.1.R1.fq.gz,/scratch/wzhang/projects/ggWGBS/data/2.dedup/HG03516.1.R2.fq.gz
+HG03516_2,HG03516_2,HG03516_2,/scratch/wzhang/projects/ggWGBS/data/2.dedup/HG03516.2.R1.fq.gz,/scratch/wzhang/projects/ggWGBS/data/2.dedup/HG03516.2.R2.fq.gz

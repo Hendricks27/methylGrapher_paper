@@ -1,0 +1,42 @@
+#!/bin/bash -l
+#SBATCH --job-name=BISCUIT
+#SBATCH --partition=general
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=42
+#SBATCH --time=144:0:00
+#SBATCH --mem=80G
+
+
+
+eval "$(conda shell.bash hook)"
+conda activate py312
+
+mkdir -p /scratch/wzhang/projects/ggWGBS/biscuit_run/HG03516/2
+
+cd /scratch/wzhang/projects/ggWGBS/biscuit_run/HG03516/2
+
+biscuit align -@ 42 -b 1 /scratch/wzhang/ref/linear/hg38/biscuit/index /scratch/wzhang/projects/ggWGBS/data/2.dedup/HG03516.2.R1.fq.gz /scratch/wzhang/projects/ggWGBS/data/2.dedup/HG03516.2.R2.fq.gz | samtools sort -@ 42 -o my_output.bam -O BAM -
+
+samtools index my_output.bam
+
+biscuit pileup -@ 42 -b 1 -m 10 -a 10 -l 10 -5 0 -3 0 -o my_pileup.vcf /scratch/wzhang/ref/linear/hg38/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna my_output.bam
+
+bgzip -@ 42 my_pileup.vcf
+
+tabix -p vcf my_pileup.vcf.gz
+
+biscuit vcf2bed -k 1 my_pileup.vcf.gz > my_methylation_data.bed
+
+biscuit mergecg /scratch/wzhang/ref/linear/hg38/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna my_methylation_data.bed > my_methylation_data.merged.bed
+
+bgzip my_methylation_data.bed
+
+tabix -p bed my_methylation_data.bed.gz
+
+bgzip my_methylation_data.merged.bed
+
+tabix -p my_methylation_data.merged.bed.gz
+
+
+

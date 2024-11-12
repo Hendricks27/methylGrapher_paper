@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 
 __author__ = "Wenjin Zhang"
-__copyright__ = "Copyright 2023, Ting Wang Lab"
+__copyright__ = "Copyright 2023-2024, Ting Wang Lab"
 __credits__ = ["Juan Macias"]
 __license__ = "MIT"
-__version__ = "0.1.0"
+__version__ = "0.1.2"
 __maintainer__ = "Wenjin Zhang"
 __email__ = "wenjin@wustl.edu"
-
 
 import os
 import sys
@@ -15,100 +14,12 @@ import sys
 import gfa
 import mcall
 import utility
-
+import alignments
 
 # Global variables
 conversion_types = ["C2T", "G2A"]
 
-
-
 help = utility.HelpDocument()
-
-
-
-
-
-def alignment(work_dir="./", index_prefix="", output_format="gaf", thread=1, directional=True):
-
-    index_prefix_ct = index_prefix + ".wl.C2T"
-    index_prefix_ga = index_prefix + ".wl.G2A"
-
-    read1_alignment_type = ["C2T"]
-    read2_alignment_type = ["G2A"]
-
-    if not directional:
-        read1_alignment_type = conversion_types
-        read2_alignment_type = conversion_types
-
-    alignment_file_path = []
-    alignment_outs = {}
-    for i in range(10):
-        alignment_out = f"{work_dir}/alignment.{i}.{output_format}"
-        alignment_file_path.append(alignment_out)
-
-        fh = open(alignment_out, "w")
-        alignment_outs[i] = fh
-
-    for ref_type in conversion_types:
-        for read_type1 in read1_alignment_type:
-            for read_type2 in read2_alignment_type:
-                if read_type1 == read_type2:
-                    continue
-                # TODO change log for single end mode
-                print(f"Aligning R1({read_type1}) & R2({read_type2}) on reference({ref_type})")
-
-                fq1 = f"{work_dir}/{read_type1}.R1.fastq.gz"
-                fq2 = f"{work_dir}/{read_type2}.R2.fastq.gz"
-
-                if ref_type == "G2A":
-                    index_prefix = index_prefix_ga
-                else:
-                    index_prefix = index_prefix_ct
-
-                giraffe_input = f"-f {fq1}"
-                if os.path.exists(fq2):
-                    giraffe_input += f" -f {fq2}"
-
-                alignment_log = f"{work_dir}/alignment.Ref_{ref_type}.R1_{read_type1}.R2_{read_type2}.log"
-
-                cmd = f"vg giraffe -p -t {thread} -o {output_format} -M 2 --named-coordinates -Z {index_prefix}.giraffe.gbz -m {index_prefix}.min -d {index_prefix}.dist {giraffe_input}"
-                # print(cmd)
-                se = utility.SystemExecute()
-                fout, flog = se.execute(cmd, stdout=None, stderr=alignment_log)
-                for line in fout:
-                    line = line.decode("utf-8")
-
-                    # Skip unaligned
-                    l = line.strip().split("\t")
-                    asterisk = False
-                    for i in [2, 3, 6, 7, 8, 9, 10, 11]:
-                        if l[i] == "*":
-                            asterisk = True
-                            break
-                    if asterisk:
-                        continue
-
-                    # Just to split alignment to multiple files, reduce memory usage for sorting
-                    ind = int(l[0][-3])
-                    alignment_out_fh = alignment_outs[ind]
-                    alignment_out_fh.write(line)
-                se.wait()
-
-    for fh in alignment_outs.values():
-        fh.close()
-
-    for fn in alignment_file_path:
-        cmd = f"sort -o {fn} {fn}"
-
-        se = utility.SystemExecute()
-        fout, flog = se.execute(cmd, stdout=None, stderr=None)
-        se.wait()
-
-    return
-
-
-
-
 
 
 
@@ -132,9 +43,6 @@ if __name__ == "__main__":
     except:
         thread = 1
 
-
-
-
     if len(args) == 0:
         print("No command specified. Use 'help' for more information.")
         print(help.help_text())
@@ -142,7 +50,7 @@ if __name__ == "__main__":
 
     command = args.pop(0)
     command = command.lower()
-    if command not in ["preparegenome", "preparelibrary", "align", "methylcall", "qc", "help", "-h", "--help", "main"]:
+    if command not in ["preparegenome", "align", "methylcall", "conversionrate", "mergecpg", "help", "-h", "--help", "main", "mergegaf"]:
         print(f"Unknown command: {command}")
         sys.exit(1)
 
@@ -165,13 +73,11 @@ if __name__ == "__main__":
         thread = int(kvargs["t"])
         del kvargs["t"]
 
-
     if command in ["help", "-h", "--help"]:
         print(help.help_text())
         sys.exit(0)
 
-
-
+    # Convert genome graph (in gfa format) to full C->T and G->A converted gfa file.
     if command == "preparegenome":
         original_gfa_file_path = kvargs["gfa"]
         prefix = kvargs["prefix"]
@@ -182,7 +88,7 @@ if __name__ == "__main__":
         original_gfa_with_lambda = prefix + ".wl.gfa"
         gfa_c2t = prefix + ".wl.C2T.gfa"
         gfa_g2a = prefix + ".wl.G2A.gfa"
-
+        graph_all_cpg_fp = prefix + ".cpg.tsv"
 
         lambda_ref = kvargs.get("lp", None)
         lambda_segment_id = gfa.add_lambda_genome_to_gfa(original_gfa_file_path, original_gfa_with_lambda, lambda_ref)
@@ -192,19 +98,23 @@ if __name__ == "__main__":
         else:
             freport.write(f"Insert lambda phage genome into genome graph as segment: {lambda_segment_id}\n")
 
+        graph_trim_flag = kvargs.get("trim", "N").lower() in "yestrue"
 
-        graph_trim_flag = kvargs.get("trim", "Y").lower() in "yestrue"
-        g = gfa.GraphicalFragmentAssemblyMemory()
-        g.parse(original_gfa_with_lambda, keep_link=True)
-        g.write_converted(gfa_c2t, "C", "T", SNV_trim=graph_trim_flag)
 
-        del g
+        if graph_trim_flag:
+            g = gfa.GraphicalFragmentAssemblyMemory()
+            g.parse(original_gfa_with_lambda, keep_link=True)
+            g.write_converted(gfa_c2t, "C", "T", SNV_trim=graph_trim_flag)
 
-        g = gfa.GraphicalFragmentAssemblyMemory()
-        g.parse(original_gfa_with_lambda, keep_link=True)
-        g.write_converted(gfa_g2a, "G", "A", SNV_trim=graph_trim_flag)
+            del g
 
-        del g
+            g = gfa.GraphicalFragmentAssemblyMemory()
+            g.parse(original_gfa_with_lambda, keep_link=True)
+            g.write_converted(gfa_g2a, "G", "A", SNV_trim=graph_trim_flag)
+
+            del g
+        else:
+            utility.gfa_converter(original_gfa_with_lambda, prefix+".wl", compress=False)
 
         for gfa_file_path in [gfa_c2t, gfa_g2a]:
             index_prefix = gfa_file_path[:-4]
@@ -221,18 +131,22 @@ if __name__ == "__main__":
                 freport.write(line)
             se.wait()
 
+        utility.get_all_cpg_from_graph(original_gfa_file_path, graph_all_cpg_fp)
+
         freport.close()
         sys.exit(0)
 
+    # Alignment and related stuff...
+    if command == "align":
 
-
-    # Convert genome graph (in gfa format) to full C->T and G->A converted gfa file.
-    if command == "preparelibrary":
         fq1 = kvargs["fq1"]
         fq2 = kvargs.get("fq2", None)
-        work_dir = kvargs.get("work_dir", "./")
 
-        compress = kvargs.get("compress", "Y")
+        work_dir = kvargs.get("work_dir", "./")
+        index_prefix = kvargs["index_prefix"]
+        output_format = "gaf"
+
+        compress = kvargs.get("compress", "N")
         if compress.lower() == "y":
             compress = True
         else:
@@ -243,28 +157,10 @@ if __name__ == "__main__":
             directional = True
         else:
             directional = False
-        utility.fastq_converter(fq1, fq2, work_dir, compress=compress, thread=thread, directional=directional)
 
+        alignments.alignment_main(fq1, fq2, work_dir, index_prefix, compress=compress, thread=thread,
+                                  directional=directional)
         sys.exit(0)
-
-
-    # Align converted FASTQ files to converted GFA files.
-    if command == "align":
-        work_dir = kvargs.get("work_dir", "./")
-        index_prefix = kvargs["index_prefix"]
-        output_format = "gaf"
-
-        directional = kvargs.get("directional", "Y")
-        if directional.lower() == "y":
-            directional = True
-        else:
-            directional = False
-
-        alignment(work_dir=work_dir, index_prefix=index_prefix, output_format=output_format, thread=thread, directional=directional)
-
-        sys.exit(0)
-
-
 
     # Call methylation
     if command == "methylcall":
@@ -295,12 +191,31 @@ if __name__ == "__main__":
 
         mcall.mcall_main(
             work_dir, gfa_file,
-            minimum_identity=minimum_identity, minimum_mapq=minimum_mapq, discard_multimapped=True,
+            minimum_identity=minimum_identity, minimum_mapq=minimum_mapq, discard_multimapped=discard_multimapped,
             process_count=thread, alignment_parse_worker_num=1, gfa_worker_num=gfa_worker_num, batch_size=batch_size
         )
 
         sys.exit(0)
 
+    # Conversion rate estimation
+    if command == "conversionrate":
+        work_dir = kvargs.get("work_dir", "./")
+        index_prefix = kvargs["index_prefix"]
+
+        s = utility.estimate_conversion_rate_print(index_prefix, work_dir)
+        print(s)
+        sys.exit(0)
+
+    # merge CpG
+    if command == "mergecpg":
+        work_dir = kvargs.get("work_dir", "./")
+        index_prefix = kvargs["index_prefix"]
+
+        graph_all_cpg_fp = index_prefix + ".cpg.tsv"
+        cytosine_fp = work_dir + "/graph.methyl"
+        merged_cytosine_in_cpg_context_fp = work_dir + "/graph.cpg.tsv"
+
+        utility.merge_graph_cytosines(graph_all_cpg_fp, cytosine_fp, merged_cytosine_in_cpg_context_fp)
 
     # One command to run all
     if command == "main":
@@ -312,7 +227,7 @@ if __name__ == "__main__":
 
         index_prefix = kvargs["index_prefix"]
 
-        compress = kvargs.get("compress", "Y")
+        compress = kvargs.get("compress", "N")
         if compress.lower() == "y":
             compress = True
         else:
@@ -336,10 +251,9 @@ if __name__ == "__main__":
             minimum_mapq = int(kvargs["minimum_mapq"])
         if "discard_multimapped" in kvargs:
             discard_multimapped = kvargs["discard_multimapped"].lower() in "yestrue"
+
         assert minimum_identity >= 0
         assert minimum_mapq >= 0
-
-
 
         batch_size = 4096
         if "batch_size" in kvargs:
@@ -349,26 +263,24 @@ if __name__ == "__main__":
         if thread > 20:
             gfa_worker_num = 2
 
-        utility.fastq_converter(fq1, fq2, work_dir, compress=compress, thread=thread, directional=directional)
-
-        alignment(work_dir=work_dir, index_prefix=index_prefix, output_format=alignment_output_format, thread=thread, directional=directional)
+        alignments.alignment_main(fq1, fq2, work_dir, index_prefix, compress=compress, thread=thread, directional=directional)
 
         mcall.mcall_main(
             work_dir, index_prefix + ".wl.gfa",
-            minimum_identity=minimum_identity, minimum_mapq=minimum_mapq, discard_multimapped=True,
+            minimum_identity=minimum_identity, minimum_mapq=minimum_mapq, discard_multimapped=discard_multimapped,
             process_count=thread, alignment_parse_worker_num=1, gfa_worker_num=gfa_worker_num, batch_size=batch_size
         )
 
-        for ct in conversion_types:
-            for ri in ["R1", "R2"]:
-                fn = f"{work_dir}/{ct}.{ri}.fastq.gz"
-                if os.path.exists(fn):
-                    os.remove(fn)
-
         sys.exit(0)
 
+    # TMP fix if memory usage is too high
+    if command == "mergegaf":
+        work_dir = kvargs.get("work_dir", "./")
 
+        alignments.alignment_merge_main(work_dir, worker_num=thread)
+        alignments.alignment_clenup(work_dir)
 
+        sys.exit(0)
 
 
 

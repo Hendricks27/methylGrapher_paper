@@ -6,12 +6,12 @@
 #SBATCH --time=100:0:00
 #SBATCH --output=/scratch/wzhang/projects/ggWGBS/perf_bench/log/1.%j.out
 #SBATCH --error=/scratch/wzhang/projects/ggWGBS/perf_bench/log/1.%j.err
-#SBATCH --mem=200G
+#SBATCH --mem=10G
 
 
 
 eval "$(conda shell.bash hook)"
-conda activate py39
+conda activate trimgalore
 
 
 cd /scratch/wzhang/projects/ggWGBS/perf_bench/data/1.trimming/

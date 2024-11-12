@@ -1,4 +1,9 @@
+alignments
 gfa
+longread
 main
+mainL
+mainLOLD
 mcall
+mgmp
 utility

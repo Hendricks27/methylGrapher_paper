@@ -6,12 +6,12 @@
 #SBATCH --time=100:0:00
 #SBATCH --output=/scratch/wzhang/projects/ggWGBS/perf_bench/log/2.%j.out
 #SBATCH --error=/scratch/wzhang/projects/ggWGBS/perf_bench/log/2.%j.err
-#SBATCH --mem=200G
+#SBATCH --mem=150G
 
 
 
 eval "$(conda shell.bash hook)"
-conda activate py39
+conda activate py312
 
 
 

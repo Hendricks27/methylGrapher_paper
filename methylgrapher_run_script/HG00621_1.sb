@@ -1,0 +1,18 @@
+#!/bin/bash -l
+#SBATCH --partition=general
+#SBATCH --job-name=test
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=90G
+#SBATCH --time=24:0:00
+
+
+
+
+cd /scratch/wzhang/projects/ggWGBS/methylgrapher_no_trim/HG00621/1
+
+python3 /scratch/wzhang/projects/ggWGBS/mgdev/methylGrapher/src/main.py Align -t 16 -fq1 /scratch/wzhang/projects/ggWGBS/data/2.dedup/HG00621.1.R1.fq.gz -fq2 /scratch/wzhang/projects/ggWGBS/data/2.dedup/HG00621.1.R2.fq.gz -compress N -index_prefix /scratch/wzhang/ref/graph/wgbs_pan_v1.0_no_prune/pan -work_dir ./ -directional Y > align.out 2> align.err
+
+
+
+
+

@@ -1,0 +1,22 @@
+#!/bin/bash -l
+#SBATCH --job-name=BWAMeth
+#SBATCH --partition=general
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=5
+#SBATCH --time=144:0:00
+#SBATCH --mem=24G
+
+
+
+eval "$(conda shell.bash hook)"
+conda activate bwameth
+
+mkdir -p /scratch/wzhang/projects/ggWGBS/bwameth/HG01978/2
+
+cd /scratch/wzhang/projects/ggWGBS/bwameth/HG01978/2
+
+bwameth.py --threads 5 --reference /scratch/wzhang/ref/linear/hg38/bwameth/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna /scratch/wzhang/projects/ggWGBS/data/2.dedup/HG01978.2.R1.fq.gz /scratch/wzhang/projects/ggWGBS/data/2.dedup/HG01978.2.R2.fq.gz > ./my_output.sam
+
+
+

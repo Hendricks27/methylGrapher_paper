@@ -3,9 +3,14 @@ README.md
 setup.cfg
 setup.py
 bin/methylGrapher
+src/alignments.py
 src/gfa.py
+src/longread.py
 src/main.py
+src/mainL.py
+src/mainLOLD.py
 src/mcall.py
+src/mgmp.py
 src/utility.py
 src/MethylGrapher.egg-info/PKG-INFO
 src/MethylGrapher.egg-info/SOURCES.txt
@@ -14,5 +19,4 @@ src/MethylGrapher.egg-info/top_level.txt
 src/methylGrapher.egg-info/PKG-INFO
 src/methylGrapher.egg-info/SOURCES.txt
 src/methylGrapher.egg-info/dependency_links.txt
-src/methylGrapher.egg-info/requires.txt
 src/methylGrapher.egg-info/top_level.txt

@@ -1,0 +1,26 @@
+#!/bin/bash -l
+#SBATCH --job-name=methyldackel
+#SBATCH --partition=general
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=4
+#SBATCH --time=144:0:00
+#SBATCH --mem=10G
+
+
+
+eval "$(conda shell.bash hook)"
+conda activate methyldackel
+
+cd /scratch/wzhang/projects/ggWGBS/bwameth/HG00621/2
+
+MethylDackel extract -q 10 -p 1 --keepSingleton /scratch/wzhang/ref/linear/hg38/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna ./my_output.sorted.bam > extract.log 2> extract.err
+
+mv my_output.sorted_CpG.bedGraph methylation.cytosine.bedGraph
+
+MethylDackel extract -q 10 -p 1 --keepSingleton --mergeContex /scratch/wzhang/ref/linear/hg38/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna ./my_output.sorted.bam > extract.merged.log 2> extract.merged.err
+
+mv my_output.sorted_CpG.bedGraph methylation.cpg.bedGraph
+
+
+

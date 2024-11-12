@@ -1,0 +1,26 @@
+#!/bin/bash -l
+#SBATCH --partition=general
+#SBATCH --job-name=tme
+#SBATCH --cpus-per-task=19
+#SBATCH --mem=40G
+#SBATCH --time=24:0:00
+
+
+
+
+cd /scratch/wzhang/projects/ggWGBS/methylgrapher_no_trim/ENC001/5/
+
+python3 /scratch/wzhang/projects/ggWGBS/mgdev/methylGrapher/src/main.py methylcall -t 20 -index_prefix /scratch/wzhang/ref/graph/wgbs_pan_v1.0_no_prune/pan -work_dir ./  > call.out 2> call.err
+mv graph.methyl default.graph.methyl
+cat default.graph.methyl | grep CG > default.graph.CG.methyl
+
+python3 /scratch/wzhang/projects/ggWGBS/mgdev/methylGrapher/src/main.py methylcall -discard_multimapped N -minimum_mapq 10 -t 20 -index_prefix /scratch/wzhang/ref/graph/wgbs_pan_v1.0_no_prune/pan -work_dir ./  > call.out 2> call.err
+mv graph.methyl mq10.graph.methyl
+cat mq10.graph.methyl | grep CG > mq10.graph.CG.methyl
+
+
+
+
+
+
+
